@@ -10,6 +10,8 @@ from torchvision import transforms
 
 class Trainer:
 	def __init__(self, training_set_dir, test_set_directory):
+		# Device definition
+		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 		# Dataset definition
 		all_transforms = transforms.Compose([transforms.Resize((IMG_RESIZE_WIDTH, IMG_RESIZE_HEIGHT)), transforms.ToTensor()])
 		training_set = ImageFolder(training_set_dir, all_transforms)
@@ -17,11 +19,9 @@ class Trainer:
 		self.training_loader = DataLoader(training_set, batch_size=BATCH_SIZE, shuffle=True)
 		self.test_loader = DataLoader(test_set, shuffle=True)
 		# Model definition
-		self.model = TarBoModel()
+		self.model = TarBoModel().to(self.device)
 		self.criterion = nn.CrossEntropyLoss()
 		self.optimizer = optim.Adam(self.model.parameters(), lr=LR)
-		# Device definition
-		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	def train(self):
 		print("--- TRAINING ---")
@@ -37,6 +37,7 @@ class Trainer:
 				loss.backward()
 				self.optimizer.step()
 			print(f"Epoch [{epoch+1}/{NUM_EPOCHS}], Loss: {loss.item()}")
+		self.save()
 
 	def test(self):
 		print("--- TESTING ---")
@@ -50,6 +51,9 @@ class Trainer:
 			# Print accuracy
 			accuracy = 100 * correct / len(self.test_loader)
 			print(f"Accuracy: {accuracy}%")
+
+	def save(self):
+		torch.save(self.model.state_dict(), "model.pt")
 
 
 if __name__ == "__main__":
