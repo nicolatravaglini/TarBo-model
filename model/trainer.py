@@ -20,11 +20,15 @@ class Trainer:
 		self.model = TarBoModel()
 		self.criterion = nn.CrossEntropyLoss()
 		self.optimizer = optim.SGD(self.model.parameters(), lr=LR)
+		# Device definition
+		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	def train(self):
 		print("--- TRAINING ---")
 		for epoch in range(NUM_EPOCHS):
 			for images, labels in self.training_loader:
+				images = images.to(self.device)
+				labels = images.to(self.device)
 				# Forward
 				outputs = self.model(images)
 				loss = self.criterion(outputs, labels)
