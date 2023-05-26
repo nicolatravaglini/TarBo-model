@@ -19,7 +19,7 @@ class Trainer:
 		# Model definition
 		self.model = TarBoModel()
 		self.criterion = nn.CrossEntropyLoss()
-		self.optimizer = optim.SGD(self.model.parameters(), lr=LR)
+		self.optimizer = optim.Adam(self.model.parameters(), lr=LR)
 		# Device definition
 		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
