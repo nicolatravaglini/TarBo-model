@@ -1,5 +1,5 @@
 from constants import *
-from model.model import TarBoModel
+from model import TarBoModel
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -28,7 +28,7 @@ class Trainer:
 		for epoch in range(NUM_EPOCHS):
 			for images, labels in self.training_loader:
 				images = images.to(self.device)
-				labels = images.to(self.device)
+				labels = labels.to(self.device)
 				# Forward
 				outputs = self.model(images)
 				loss = self.criterion(outputs, labels)
