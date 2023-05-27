@@ -5,7 +5,7 @@ from rcnn import RCNN
 
 
 def main():
-	img = numpy.array(Image.open("test/IMG20230527190741.jpg").resize((IMG_ORIGINAL_WIDTH, IMG_ORIGINAL_HEIGHT)))
+	img = numpy.array(Image.open("test/IMG20230527190802.jpg").resize((IMG_ORIGINAL_WIDTH, IMG_ORIGINAL_HEIGHT)))
 	rcnn = RCNN()
 	classes = rcnn.classify(img)
 	print(classes)
