@@ -49,7 +49,7 @@ class RCNN:
 
 	def classify(self, image):
 		# Individua le regioni d'interesse (RoI)
-		boxes = selective_search.selective_search(image, mode="fast", random_sort=False)
+		boxes = selective_search.selective_search(image, mode="single", random_sort=True)
 		filtered_boxes = selective_search.box_filter(boxes, min_size=20, topN=80)
 
 		# Per ogni regione ridimensionala e predici la classe con il modello
@@ -77,6 +77,7 @@ class RCNN:
 		for box in boxes:
 			bbox = mpatches.Rectangle((box.x1, box.y1), (box.x2 - box.x1), (box.y2 - box.y1), fill=False, edgecolor='red', linewidth=1)
 			ax.add_patch(bbox)
+			plt.text(box.x1, box.y1, box.predicted_class)
 		plt.axis('off')
 		plt.show()
 
