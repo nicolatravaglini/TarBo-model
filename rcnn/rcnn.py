@@ -1,4 +1,3 @@
-import math
 from constants import *
 import torch
 from torchvision import transforms
