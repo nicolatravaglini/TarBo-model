@@ -20,7 +20,7 @@ class Trainer:
 		self.test_loader = DataLoader(test_set, shuffle=True)
 		# Model definition
 		self.model = TarBoModel().to(self.device)
-		self.criterion = nn.CrossEntropyLoss()
+		self.criterion = nn.NLLLoss()
 		self.optimizer = optim.Adam(self.model.parameters(), lr=LR)
 
 	def train(self):

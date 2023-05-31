@@ -66,7 +66,7 @@ class RCNN:
 				probability, predicted = torch.max(output.data, 1)
 				predicted_class = OUTPUTS[predicted.item()]
 				if predicted_class != "sfondo":
-					boxes.append(Box(x1, y1, x2, y2, predicted_class, probability))
+					boxes.append(Box(x1, y1, x2, y2, predicted_class, probability.item()))
 
 		# Applico NMS
 		self.non_max_suppression(boxes)
@@ -76,7 +76,7 @@ class RCNN:
 		for box in boxes:
 			bbox = mpatches.Rectangle((box.x1, box.y1), (box.x2 - box.x1), (box.y2 - box.y1), fill=False, edgecolor='red', linewidth=1)
 			ax.add_patch(bbox)
-			plt.text(box.x1, box.y1, box.predicted_class)
+			plt.text(box.x1, box.y1, box.predicted_class+"-"+str(box.probability))
 		plt.axis('off')
 		plt.show()
 
