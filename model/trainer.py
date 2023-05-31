@@ -12,15 +12,25 @@ class Trainer:
 	def __init__(self, training_set_dir, test_set_directory):
 		# Device definition
 		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 		# Dataset definition
-		all_transforms = transforms.Compose([transforms.Resize((IMG_RESIZE_WIDTH, IMG_RESIZE_HEIGHT)), transforms.ToTensor()])
+		all_transforms = transforms.Compose([
+			transforms.Resize((IMG_RESIZE_WIDTH, IMG_RESIZE_HEIGHT)),
+			transforms.RandomResizedCrop(IMG_RESIZE_WIDTH),
+			transforms.RandomHorizontalFlip(),
+			transforms.RandomRotation(degrees=10),
+			transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+			transforms.ToTensor(),
+			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+		])
 		training_set = ImageFolder(training_set_dir, all_transforms)
 		test_set = ImageFolder(test_set_directory, all_transforms)
 		self.training_loader = DataLoader(training_set, batch_size=BATCH_SIZE, shuffle=True)
 		self.test_loader = DataLoader(test_set, shuffle=True)
+
 		# Model definition
 		self.model = TarBoModel().to(self.device)
-		self.criterion = nn.NLLLoss()
+		self.criterion = nn.CrossEntropyLoss()
 		self.optimizer = optim.Adam(self.model.parameters(), lr=LR)
 
 	def train(self):
@@ -29,9 +39,11 @@ class Trainer:
 			for images, labels in self.training_loader:
 				images = images.to(self.device)
 				labels = labels.to(self.device)
+
 				# Forward
 				outputs = self.model(images)
 				loss = self.criterion(outputs, labels)
+
 				# Backward
 				self.optimizer.zero_grad()
 				loss.backward()
@@ -48,6 +60,7 @@ class Trainer:
 				outputs = self.model(images)
 				_, predicted = torch.max(outputs.data, 1)
 				correct += (predicted == labels).item()
+
 			# Print accuracy
 			accuracy = 100 * correct / len(self.test_loader)
 			print(f"Accuracy: {accuracy}%")
