@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
+import matplotlib.pyplot as plt
 
 
 class Trainer:
@@ -14,17 +15,22 @@ class Trainer:
 		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 		# Dataset definition
-		all_transforms = transforms.Compose([
+		training_transforms = transforms.Compose([
 			transforms.Resize((IMG_RESIZE_WIDTH, IMG_RESIZE_HEIGHT)),
-			transforms.RandomResizedCrop(IMG_RESIZE_WIDTH),
-			transforms.RandomHorizontalFlip(),
+			# transforms.RandomResizedCrop(IMG_RESIZE_WIDTH),
+			# transforms.RandomHorizontalFlip(),
 			transforms.RandomRotation(degrees=10),
 			transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
 			transforms.ToTensor(),
 			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 		])
-		training_set = ImageFolder(training_set_dir, all_transforms)
-		test_set = ImageFolder(test_set_directory, all_transforms)
+		test_transforms = transforms.Compose([
+			transforms.Resize((IMG_RESIZE_WIDTH, IMG_RESIZE_HEIGHT)),
+			transforms.ToTensor(),
+			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+		])
+		training_set = ImageFolder(training_set_dir, training_transforms)
+		test_set = ImageFolder(test_set_directory, test_transforms)
 		self.training_loader = DataLoader(training_set, batch_size=BATCH_SIZE, shuffle=True)
 		self.test_loader = DataLoader(test_set, shuffle=True)
 
@@ -57,6 +63,8 @@ class Trainer:
 			self.model.eval()
 			correct = 0
 			for images, labels in self.test_loader:
+				images = images.to(self.device)
+				labels = labels.to(self.device)
 				outputs = self.model(images)
 				_, predicted = torch.max(outputs.data, 1)
 				correct += (predicted == labels).item()
@@ -65,11 +73,34 @@ class Trainer:
 			accuracy = 100 * correct / len(self.test_loader)
 			print(f"Accuracy: {accuracy}%")
 
+	def show_training_images(self):
+		# Ottieni una batch d'immagini ed etichette dal training loader
+		images, labels = next(iter(self.training_loader))
+		images = images.numpy()
+		labels = labels.numpy()
+
+		# Visualizza le immagini e le etichette
+		fig, axes = plt.subplots(nrows=4, ncols=12, figsize=(12, 4))
+
+		for i, ax in enumerate(axes.flat):
+			# Mostra l'immagine
+			ax.imshow(images[i].transpose(1, 2, 0))
+			ax.axis('off')
+
+			# Mostra l'etichetta
+			label = OUTPUTS[labels[i]]
+			ax.set_title(label)
+
+		# Mostra il plot
+		plt.tight_layout()
+		plt.show()
+
 	def save(self):
 		torch.save(self.model.state_dict(), "model.pt")
 
 
 if __name__ == "__main__":
 	trainer = Trainer("dataset/training_set", "dataset/test_set")
+	trainer.show_training_images()
 	trainer.train()
 	trainer.test()

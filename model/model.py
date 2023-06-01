@@ -19,6 +19,7 @@ class TarBoModel(nn.Module):
 
 		self.classifier = nn.Sequential(
 			nn.Linear(64 * (IMG_RESIZE_WIDTH // 4) * (IMG_RESIZE_HEIGHT // 4), 128),
+			nn.Dropout(0.6),
 			nn.ReLU(),
 			nn.Linear(128, NUM_CLASSES)
 		)
