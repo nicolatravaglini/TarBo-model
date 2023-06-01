@@ -13,6 +13,7 @@ class Trainer:
 	def __init__(self, training_set_dir, test_set_directory):
 		# Device definition
 		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+		print(self.device)
 
 		# Dataset definition
 		training_transforms = transforms.Compose([
