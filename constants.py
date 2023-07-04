@@ -9,9 +9,4 @@ BATCH_SIZE = 48
 NUM_EPOCHS = 5
 LR = 0.00083
 
-OUTPUTS = {
-    0: "fanciullo",
-    1: "giullare",
-    2: "guanto",
-    3: "sfondo"
-}
+OUTPUTS = {'fanciullo': 0, 'giullare': 1, 'guanto': 2, 'sfondo': 3}

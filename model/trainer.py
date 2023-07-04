@@ -32,6 +32,7 @@ class Trainer:
 		])
 		training_set = ImageFolder(training_set_dir, training_transforms)
 		test_set = ImageFolder(test_set_directory, test_transforms)
+		print(training_set.class_to_idx)
 		self.training_loader = DataLoader(training_set, batch_size=BATCH_SIZE, shuffle=True)
 		self.test_loader = DataLoader(test_set, shuffle=True)
 
