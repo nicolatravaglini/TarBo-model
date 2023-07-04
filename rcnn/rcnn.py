@@ -49,10 +49,10 @@ class RCNN:
 	def false_max_suppression(self, boxes):
 		to_delete = []
 		for box in boxes:
-			if box.probability <= 50:
+			if box.probability <= 30:
 				to_delete.append(box)
 
-		for prediction_class in OUTPUTS.values():
+		for prediction_class in OUTPUTS.keys():
 			class_boxes = [box for box in boxes if box.predicted_class == prediction_class]
 			if len(class_boxes) > 0:
 				# Seleziona la box con probabilità più alta
