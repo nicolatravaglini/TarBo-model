@@ -89,7 +89,7 @@ class Trainer:
 			ax.axis('off')
 
 			# Mostra l'etichetta
-			label = OUTPUTS[labels[i]]
+			label = list(OUTPUTS)[labels[i]]
 			ax.set_title(label)
 
 		# Mostra il plot
