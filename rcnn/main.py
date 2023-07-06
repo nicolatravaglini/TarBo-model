@@ -1,7 +1,7 @@
-from constants import *
+from ..constants import *
 from PIL import Image
 import numpy
-from rcnn import RCNN
+from rcnn.rcnn import RCNN
 
 
 def main():

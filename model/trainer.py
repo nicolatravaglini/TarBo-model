@@ -1,5 +1,5 @@
-from constants import *
-from model import TarBoModel
+from ..constants import *
+from model.model import TarBoModel
 import torch
 import torch.nn as nn
 import torch.optim as optim

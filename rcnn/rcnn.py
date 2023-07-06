@@ -1,8 +1,8 @@
-from constants import *
+from ..constants import *
 import torch
 from torchvision import transforms
 import selective_search
-from model.model import TarBoModel
+from ..model.model import TarBoModel
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
