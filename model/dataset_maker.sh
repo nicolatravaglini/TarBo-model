@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # creo per ogni video in video/ una cartella con il suo nome in dataset/training_set e in dataset/test_set
-videos=$(ls ./video)
+videos=$(ls ./drive/MyDrive/tarbo)
 for video in $videos
 do
   video_name=$(echo "$video" | cut -d "." -f 1)
@@ -14,7 +14,7 @@ done
 for video in $videos
 do
   video_name=$(echo "$video" | cut -d "." -f 1)
-  ffmpeg -i ./video/"$video" ./dataset/training_set/"$video_name"/%03d.png -hide_banner
+  ffmpeg -i ./drive/MyDrive/tarbo/"$video" -vf scale=240:426 ./dataset/training_set/"$video_name"/%03d.png -hide_banner
 done
 
 # scelgo randomicamente 1/5 del training_set da spostare in test_set per ogni video
