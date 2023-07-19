@@ -49,7 +49,7 @@ class RCNN:
 	def false_max_suppression(self, boxes):
 		to_delete = []
 		for box in boxes:
-			if box.probability <= 30:
+			if box.probability <= 10:
 				to_delete.append(box)
 
 		for prediction_class in OUTPUTS.keys():
@@ -97,6 +97,7 @@ class RCNN:
 				if predicted_class != "sfondo":
 					boxes.append(Box(x1, y1, x2, y2, predicted_class, probability.item()))
 
+		"""
 		fig, axes = plt.subplots(nrows=10, ncols=8, figsize=(12, 10))
 		for box, ax in zip(box_imgs, axes.flat):
 			# Mostra l'immagine
@@ -104,11 +105,13 @@ class RCNN:
 			ax.axis('off')
 		plt.tight_layout()
 		plt.show()
+		"""
 
 		# Applico NMS
 		# self.non_max_suppression(boxes)
 		self.false_max_suppression(boxes)
 
+		"""
 		fig, ax = plt.subplots(figsize=(6, 6))
 		ax.imshow(image)
 		for box in boxes:
@@ -117,6 +120,7 @@ class RCNN:
 			plt.text(box.x1, box.y1, box.predicted_class+"-"+str(int(box.probability)), color="yellow")
 		plt.axis('off')
 		plt.show()
+		"""
 
 		# Salva e restituisci i risultati
 		return [box.predicted_class for box in boxes]
