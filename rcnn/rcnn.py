@@ -72,7 +72,7 @@ class RCNN:
 	def classify(self, image):
 		# Individua le regioni d'interesse (RoI)
 		boxes = selective_search.selective_search(image, mode="single", random_sort=True)
-		filtered_boxes = selective_search.box_filter(boxes, min_size=50, topN=80)
+		filtered_boxes = selective_search.box_filter(boxes, min_size=10, topN=80)
 
 		# Per ogni regione ridimensionala e predici la classe con il modello
 		boxes = []
@@ -90,7 +90,7 @@ class RCNN:
 				box_imgs.append(box_img)
 				box_img = box_img.unsqueeze(0)
 
-				# Ottengo la classe, faccio NMS e la salvo (solo se non è lo sfondo)
+				# Ottengo la classe e la salvo (solo se non è lo sfondo)
 				output = self.model(box_img)
 				probability, predicted = torch.max(output.data, 1)
 				predicted_class = list(OUTPUTS)[predicted.item()]
@@ -108,7 +108,7 @@ class RCNN:
 		"""
 
 		# Applico NMS
-		# self.non_max_suppression(boxes)
+		# TODO: self.non_max_suppression(boxes)
 		self.false_max_suppression(boxes)
 
 		"""
