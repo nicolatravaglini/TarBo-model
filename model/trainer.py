@@ -1,5 +1,5 @@
-from ..constants import *
-from model.model import TarBoModel
+from constants import *
+from model import TarBoModel
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -12,6 +12,7 @@ import wandb
 
 class Trainer:
 	def __init__(self, training_set_dir, test_set_directory):
+		wandb.init()
 		# Device definition
 		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 		print(self.device)
@@ -104,6 +105,11 @@ class Trainer:
 		torch.save(self.model.state_dict(), "model.pt")
 
 
+def train():
+	trainer = Trainer("dataset/training_set", "dataset/test_set")
+	trainer.train()
+
+
 if __name__ == "__main__":
 	"""
 	trainer = Trainer("dataset/training_set", "dataset/test_set")
@@ -111,7 +117,7 @@ if __name__ == "__main__":
 	trainer.train()
 	trainer.test()
 	"""
-	wandb.login()
+	wandb.login(key="89fa9192625ce23a92c7e9b2459f2f7e61823a51")
 	sweep_conf = {
 		"method": "bayes",
 		"metric": {
@@ -134,5 +140,5 @@ if __name__ == "__main__":
 		}
 	}
 	sweep_id = wandb.sweep(sweep=sweep_conf, project="TarBo")
-	wandb.agent(sweep_id, function=Trainer("dataset/training_set", "dataset/test_set").train, count=1)
+	wandb.agent(sweep_id, function=train, count=30)
 
