@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
 import matplotlib.pyplot as plt
+import wandb
 
 
 class Trainer:
@@ -33,17 +34,17 @@ class Trainer:
 		training_set = ImageFolder(training_set_dir, training_transforms)
 		test_set = ImageFolder(test_set_directory, test_transforms)
 		print(training_set.class_to_idx)
-		self.training_loader = DataLoader(training_set, batch_size=BATCH_SIZE, shuffle=True)
+		self.training_loader = DataLoader(training_set, batch_size=wandb.config.batch_size, shuffle=True)
 		self.test_loader = DataLoader(test_set, shuffle=True)
 
 		# Model definition
 		self.model = TarBoModel().to(self.device)
 		self.criterion = nn.CrossEntropyLoss()
-		self.optimizer = optim.Adam(self.model.parameters(), lr=LR)
+		self.optimizer = optim.Adam(self.model.parameters(), lr=wandb.config.lr)
 
 	def train(self):
 		print("--- TRAINING ---")
-		for epoch in range(NUM_EPOCHS):
+		for epoch in range(wandb.config.epochs):
 			for images, labels in self.training_loader:
 				images = images.to(self.device)
 				labels = labels.to(self.device)
@@ -56,7 +57,9 @@ class Trainer:
 				self.optimizer.zero_grad()
 				loss.backward()
 				self.optimizer.step()
-			print(f"Epoch [{epoch+1}/{NUM_EPOCHS}], Loss: {loss.item()}")
+
+				wandb.log({"loss": loss.item()})
+			print(f"Epoch [{epoch+1}/{wandb.config.epochs}], Loss: {loss.item()}")
 		self.save()
 
 	def test(self):
@@ -102,7 +105,34 @@ class Trainer:
 
 
 if __name__ == "__main__":
+	"""
 	trainer = Trainer("dataset/training_set", "dataset/test_set")
 	trainer.show_training_images()
 	trainer.train()
 	trainer.test()
+	"""
+	wandb.login()
+	sweep_conf = {
+		"method": "bayes",
+		"metric": {
+			"goal": "minimize",
+			"name": "loss"
+		},
+		"parameters": {
+			"batch_size": {
+				"min": 24,
+				"max": 480
+			},
+			"epochs": {
+				"min": 2,
+				"max": 8
+			},
+			"lr": {
+				"min": 0.0005,
+				"max": 0.1
+			}
+		}
+	}
+	sweep_id = wandb.sweep(sweep=sweep_conf, project="TarBo")
+	wandb.agent(sweep_id, function=Trainer("dataset/training_set", "dataset/test_set").train, count=1)
+
