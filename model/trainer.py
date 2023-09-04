@@ -35,17 +35,17 @@ class Trainer:
 		training_set = ImageFolder(training_set_dir, training_transforms)
 		test_set = ImageFolder(test_set_directory, test_transforms)
 		print(training_set.class_to_idx)
-		self.training_loader = DataLoader(training_set, batch_size=wandb.config.batch_size, shuffle=True)
+		self.training_loader = DataLoader(training_set, batch_size=BATCH_SIZE, shuffle=True)
 		self.test_loader = DataLoader(test_set, shuffle=True)
 
 		# Model definition
 		self.model = TarBoModel().to(self.device)
 		self.criterion = nn.CrossEntropyLoss()
-		self.optimizer = optim.Adam(self.model.parameters(), lr=wandb.config.lr)
+		self.optimizer = optim.Adam(self.model.parameters(), lr=LR)
 
 	def train(self):
 		print("--- TRAINING ---")
-		for epoch in range(wandb.config.epochs):
+		for epoch in range(NUM_EPOCHS):
 			wandb.log({"epoch": epoch})
 			for images, labels in self.training_loader:
 				images = images.to(self.device)
@@ -61,7 +61,7 @@ class Trainer:
 				self.optimizer.step()
 
 				wandb.log({"loss": loss.item()})
-			print(f"Epoch [{epoch+1}/{wandb.config.epochs}], Loss: {loss.item()}")
+			print(f"Epoch [{epoch+1}/{NUM_EPOCHS}], Loss: {loss.item()}")
 		self.save()
 
 	def test(self):
