@@ -14,7 +14,7 @@ done
 for video in $videos
 do
   video_name=$(echo "$video" | cut -d "." -f 1)
-  ffmpeg -i ./video/"$video" ./dataset/training_set/"$video_name"/%03d.png -hide_banner
+  ffmpeg -i ./video/"$video" -vf scale=240:426 ./dataset/training_set/"$video_name"/%03d.png -hide_banner
 done
 
 # scelgo randomicamente 1/5 del training_set da spostare in test_set per ogni video

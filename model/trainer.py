@@ -1,5 +1,5 @@
-from ..constants import *
-from model.model import TarBoModel
+from constants import *
+from model import TarBoModel
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,10 +7,12 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
 import matplotlib.pyplot as plt
+import wandb
 
 
 class Trainer:
 	def __init__(self, training_set_dir, test_set_directory):
+		wandb.init()
 		# Device definition
 		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 		print(self.device)
@@ -44,6 +46,7 @@ class Trainer:
 	def train(self):
 		print("--- TRAINING ---")
 		for epoch in range(NUM_EPOCHS):
+			wandb.log({"epoch": epoch})
 			for images, labels in self.training_loader:
 				images = images.to(self.device)
 				labels = labels.to(self.device)
@@ -56,6 +59,8 @@ class Trainer:
 				self.optimizer.zero_grad()
 				loss.backward()
 				self.optimizer.step()
+
+				wandb.log({"loss": loss.item()})
 			print(f"Epoch [{epoch+1}/{NUM_EPOCHS}], Loss: {loss.item()}")
 		self.save()
 
@@ -101,8 +106,41 @@ class Trainer:
 		torch.save(self.model.state_dict(), "model.pt")
 
 
-if __name__ == "__main__":
+def train():
 	trainer = Trainer("dataset/training_set", "dataset/test_set")
 	trainer.show_training_images()
 	trainer.train()
 	trainer.test()
+
+
+def sweep():
+	wandb.login(key="89fa9192625ce23a92c7e9b2459f2f7e61823a51")
+	sweep_conf = {
+		"method": "bayes",
+		"metric": {
+			"goal": "minimize",
+			"name": "loss"
+		},
+		"parameters": {
+			"batch_size": {
+				"min": 24,
+				"max": 480
+			},
+			"epochs": {
+				"min": 2,
+				"max": 6
+			},
+			"lr": {
+				"min": 0.0001,
+				"max": 0.003
+			}
+		}
+	}
+	sweep_id = wandb.sweep(sweep=sweep_conf, project="TarBo")
+	wandb.agent(sweep_id, function=train, count=30)
+
+
+if __name__ == "__main__":
+	train()
+	# sweep()
+
