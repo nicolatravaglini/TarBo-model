@@ -1,4 +1,4 @@
 /model/dataset
 /model/video
 /model/wandb
-/model/model.pt
+# /model/model.pt
