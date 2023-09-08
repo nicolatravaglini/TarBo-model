@@ -113,9 +113,7 @@ def train():
 	trainer.test()
 
 
-if __name__ == "__main__":
-	train()
-	"""
+def sweep():
 	wandb.login(key="89fa9192625ce23a92c7e9b2459f2f7e61823a51")
 	sweep_conf = {
 		"method": "bayes",
@@ -140,5 +138,9 @@ if __name__ == "__main__":
 	}
 	sweep_id = wandb.sweep(sweep=sweep_conf, project="TarBo")
 	wandb.agent(sweep_id, function=train, count=30)
-	"""
+
+
+if __name__ == "__main__":
+	train()
+	# sweep()
 
