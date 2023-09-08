@@ -37,19 +37,20 @@ class RCNN:
 
 				# Elimina tutte le box che entrano o collidono con quella di maggiore probabilità
 				# (non tutte le restanti perché ci sono due carte uguali nel gioco)
-				highest_width = (highest_probability_box.x2-highest_probability_box.x1)//2
-				highest_height = (highest_probability_box.y2-highest_probability_box.y1)//2
-				highest_center_x, highest_center_y = highest_probability_box.x1+highest_width, highest_probability_box.y1+highest_height
+				highest_width = (highest_probability_box.x2 - highest_probability_box.x1) // 2
+				highest_height = (highest_probability_box.y2 - highest_probability_box.y1) // 2
+				highest_center_x, highest_center_y = highest_probability_box.x1 + highest_width, highest_probability_box.y1 + highest_height
 				for box in class_boxes:
 					if box != highest_probability_box:
-						box_center_x, box_center_y = box.x1+(box.x2-box.x1)//2, box.y1+(box.y2-box.y1)//2
-						if abs(box_center_x-highest_center_x) < highest_width*2 or abs(box_center_y-highest_center_y) < highest_height*2:
+						box_center_x, box_center_y = box.x1 + (box.x2 - box.x1) // 2, box.y1 + (box.y2 - box.y1) // 2
+						if abs(box_center_x - highest_center_x) < highest_width * 2 or abs(
+								box_center_y - highest_center_y) < highest_height * 2:
 							boxes.remove(box)
 
 	def false_max_suppression(self, boxes):
 		to_delete = []
 		for box in boxes:
-			if box.probability <= 10:
+			if box.probability <= 30:
 				to_delete.append(box)
 
 		for prediction_class in OUTPUTS.keys():
@@ -69,10 +70,29 @@ class RCNN:
 		for box in to_delete:
 			boxes.remove(box)
 
+	def _show_box_images(self, box_imgs):
+		fig, axes = plt.subplots(nrows=10, ncols=8, figsize=(12, 10))
+		for box, ax in zip(box_imgs, axes.flat):
+			# Mostra l'immagine
+			ax.imshow(box.permute(1, 2, 0))
+			ax.axis('off')
+		plt.tight_layout()
+		plt.show()
+
+	def _show_boxes_on_image(self, image, boxes):
+		fig, ax = plt.subplots(figsize=(6, 6))
+		ax.imshow(image)
+		for box in boxes:
+			bbox = mpatches.Rectangle((box.x1, box.y1), (box.x2 - box.x1), (box.y2 - box.y1), fill=False, edgecolor='red', linewidth=1)
+			ax.add_patch(bbox)
+			plt.text(box.x1, box.y1, box.predicted_class + "-" + str(int(box.probability)), color="yellow")
+		plt.axis('off')
+		plt.show()
+
 	def classify(self, image):
 		# Individua le regioni d'interesse (RoI)
 		boxes = selective_search.selective_search(image, mode="single", random_sort=True)
-		filtered_boxes = selective_search.box_filter(boxes, min_size=10, topN=80)
+		filtered_boxes = selective_search.box_filter(boxes, min_size=40, topN=80)
 
 		# Per ogni regione ridimensionala e predici la classe con il modello
 		boxes = []
@@ -97,30 +117,13 @@ class RCNN:
 				if predicted_class != "sfondo":
 					boxes.append(Box(x1, y1, x2, y2, predicted_class, probability.item()))
 
-		"""
-		fig, axes = plt.subplots(nrows=10, ncols=8, figsize=(12, 10))
-		for box, ax in zip(box_imgs, axes.flat):
-			# Mostra l'immagine
-			ax.imshow(box.permute(1, 2, 0))
-			ax.axis('off')
-		plt.tight_layout()
-		plt.show()
-		"""
+		self._show_box_images(box_imgs)
 
 		# Applico NMS
 		# TODO: self.non_max_suppression(boxes)
 		self.false_max_suppression(boxes)
 
-		"""
-		fig, ax = plt.subplots(figsize=(6, 6))
-		ax.imshow(image)
-		for box in boxes:
-			bbox = mpatches.Rectangle((box.x1, box.y1), (box.x2 - box.x1), (box.y2 - box.y1), fill=False, edgecolor='red', linewidth=1)
-			ax.add_patch(bbox)
-			plt.text(box.x1, box.y1, box.predicted_class+"-"+str(int(box.probability)), color="yellow")
-		plt.axis('off')
-		plt.show()
-		"""
+		self._show_boxes_on_image(image, boxes)
 
 		# Salva e restituisci i risultati
 		return [box.predicted_class for box in boxes]
