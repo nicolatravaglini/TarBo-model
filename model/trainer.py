@@ -20,17 +20,22 @@ class Trainer:
 		# Dataset definition
 		training_transforms = transforms.Compose([
 			transforms.Resize((IMG_RESIZE_WIDTH, IMG_RESIZE_HEIGHT)),
-			# transforms.RandomResizedCrop(IMG_RESIZE_WIDTH),
-			# transforms.RandomHorizontalFlip(),
-			transforms.RandomRotation(degrees=10),
-			transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+
+			transforms.RandomRotation(degrees=30),  # Ruota l'immagine casualmente fino a 30 gradi.
+			transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),  # Jittering dei colori.
+			transforms.RandomErasing(p=0.2, scale=(0.02, 0.2), ratio=(0.3, 3.3)), # Copre casualmente parti dell'immagine.
+			transforms.GaussianBlur(kernel_size=3),  # Aggiunge una sfocatura casuale con un kernel di dimensione 3x3.
+			transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1), shear=10), # Trasformazioni affini casuali.
+
+			# transforms.RandomRotation(degrees=10),
+			# transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
 			transforms.ToTensor(),
-			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+			# transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 		])
 		test_transforms = transforms.Compose([
 			transforms.Resize((IMG_RESIZE_WIDTH, IMG_RESIZE_HEIGHT)),
 			transforms.ToTensor(),
-			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+			# transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 		])
 		training_set = ImageFolder(training_set_dir, training_transforms)
 		test_set = ImageFolder(test_set_directory, test_transforms)
