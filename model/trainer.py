@@ -19,8 +19,9 @@ class Trainer:
 
 		# Dataset definition
 		training_transforms = transforms.Compose([
-			transforms.RandomRotation(degrees=20),
+			# transforms.RandomRotation(degrees=20),
 			transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+			transforms.RandomAffine(degrees=(-10, 10), translate=(0.2, 0.2), scale=(0.9, 1.1), shear=(-10, 10)),
 			transforms.Resize((IMG_RESIZE_WIDTH, IMG_RESIZE_HEIGHT)),
 			transforms.ToTensor(),
 			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -107,13 +108,12 @@ class Trainer:
 def train():
 	trainer = Trainer("dataset/training_set", "dataset/test_set")
 	trainer.show_training_images()
-	trainer.train()
+	# trainer.train()
 	trainer.test()
 
 
 def sweep():
-	wandb.login(key="89fa9192625ce23a92c7e9b2459f2f7e61823a51")
-	sweep_conf = {
+	sweep_gen = {
 		"method": "bayes",
 		"metric": {
 			"goal": "minimize",
@@ -134,11 +134,41 @@ def sweep():
 			}
 		}
 	}
-	sweep_id = wandb.sweep(sweep=sweep_conf, project="TarBo")
-	wandb.agent(sweep_id, function=train, count=30)
+
+	sweep_dropout = {
+		"method": "bayes",
+		"metric": {
+			"goal": "minimize",
+			"name": "loss"
+		},
+		"parameters": {
+			"dropout": {
+				"min": 0.1,
+				"max": 0.9
+			}
+		}
+	}
+
+	sweep_lr = {
+		"method": "bayes",
+		"metric": {
+			"goal": "minimize",
+			"name": "loss"
+		},
+		"parameters": {
+			"lr": {
+				"min": 0.0001,
+				"max": 0.001
+			}
+		}
+	}
+
+	sweep_id = wandb.sweep(sweep=sweep_lr, project="TarBo")
+	wandb.agent(sweep_id, function=train, count=10)
 
 
 if __name__ == "__main__":
+	wandb.login(key="89fa9192625ce23a92c7e9b2459f2f7e61823a51")
 	train()
 	# sweep()
 
