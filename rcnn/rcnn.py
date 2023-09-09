@@ -20,7 +20,7 @@ class Box:
 class RCNN:
 	def __init__(self):
 		self.model = TarBoModel()
-		self.model.load_state_dict(torch.load("../model/model.pt"))
+		self.model.load_state_dict(torch.load("../model/model.pt", map_location=torch.device("cpu")))
 		self.model.eval()
 
 	def non_max_suppression(self, boxes):
@@ -50,7 +50,7 @@ class RCNN:
 	def false_max_suppression(self, boxes):
 		to_delete = []
 		for box in boxes:
-			if box.probability <= 30:
+			if box.probability <= 20:
 				to_delete.append(box)
 
 		for prediction_class in OUTPUTS.keys():
